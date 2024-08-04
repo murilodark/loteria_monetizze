@@ -71,7 +71,7 @@ class aux_class_usuario_sistema extends Class_Valida_Dados
                 $this->setConteudo($this->Class_usuario_sistema->getArrayAtributos());
                 break;                
             default:
-            $this->setErros('Requisição incorreta. Não foi passado parâmetros.');
+            $this->setErros('Requisição incorreta. Não foi passado parâmetros válidos.');
             $this->setConteudo($this->getErros());
         }
     }

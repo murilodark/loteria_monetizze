@@ -12,6 +12,9 @@ class Class_loteria
     private $usuario_sistema_sorteio;
     private $resp;
     private $db;
+    private $Class_usuario_sistema_cadastro;
+    private $Class_usuario_sistema_sorteio;
+    private $Class_usuario_jogos;
 
     // Construtor da classe
     public function __construct($db = "", $idloteria = "", $data_cadastro = "", $data_sorteio = "", $nome_loteria = "", $dezenas_sorteadas = "", $status_loteria = "", $usuario_sistema_cadastro = "", $usuario_sistema_sorteio = "")
@@ -25,6 +28,9 @@ class Class_loteria
         $this->setusuario_sistema_cadastro($usuario_sistema_cadastro);
         $this->setusuario_sistema_sorteio($usuario_sistema_sorteio);
         $this->db = $db;
+        $this->Class_usuario_sistema_cadastro = new Class_usuario_sistema($this->db);
+        $this->Class_usuario_sistema_sorteio = new Class_usuario_sistema($this->db);
+        $this->Class_usuario_jogos = new Class_usuario_jogos($this->db);
     }
 
     public function getArrayAtributos()
@@ -36,25 +42,9 @@ class Class_loteria
             'nome_loteria' => $this->getnome_loteria(),
             'dezenas_sorteadas' => $this->getdezenas_sorteadas(),
             'status_loteria' => $this->getstatus_loteria(),
-            'usuario_sistema_cadastro' => $this->getusuario_sistema_cadastro(),
-            'usuario_sistema_sorteio' => $this->getusuario_sistema_sorteio(),
+            'usuario_sistema_cadastro' => $this->Class_usuario_sistema_cadastro->getnome_usuario(),
+            'usuario_sistema_sorteio' =>  $this->Class_usuario_sistema_sorteio->getnome_usuario(),
         ];
-    }
-
-    public function getArrayAtributosJSON()
-    {
-        $array = [
-            'idloteria' => $this->getidloteria(),
-            'data_cadastro' => $this->getdata_cadastro(),
-            'data_sorteio' => $this->getdata_sorteio(),
-            'nome_loteria' => $this->getnome_loteria(),
-            'dezenas_sorteadas' => $this->getdezenas_sorteadas(),
-            'status_loteria' => $this->getstatus_loteria(),
-            'usuario_sistema_cadastro' => $this->getusuario_sistema_cadastro(),
-            'usuario_sistema_sorteio' => $this->getusuario_sistema_sorteio(),
-        ];
-
-        return json_encode($array);
     }
 
     // Função para carregar um registro da loteria
@@ -75,7 +65,10 @@ class Class_loteria
                 $this->setstatus_loteria($obj->status_loteria);
                 $this->setusuario_sistema_cadastro($obj->usuario_sistema_cadastro);
                 $this->setusuario_sistema_sorteio($obj->usuario_sistema_sorteio);
-
+                $this->Class_usuario_sistema_cadastro->carregausuario_sistema($this->getusuario_sistema_cadastro());
+                if ($this->getusuario_sistema_sorteio()) {
+                    $this->Class_usuario_sistema_sorteio->carregausuario_sistema($this->getusuario_sistema_sorteio());
+                }
                 return true;
             }
         }
@@ -87,12 +80,14 @@ class Class_loteria
         $dados = '';
         $dados .= "'" . $this->getdata_cadastro() . "',";
         $dados .= "'" . $this->getnome_loteria() . "',";
+        $dados .= "'" . $this->getdata_sorteio() . "',";
         $dados .= "'" . $this->getstatus_loteria() . "',";
         $dados .= "'" . $this->getusuario_sistema_cadastro() . "'";
 
         $sql = "INSERT INTO loteria (
                         data_cadastro, 
                         nome_loteria, 
+                        data_sorteio, 
                         status_loteria, 
                         usuario_sistema_cadastro
                     ) 
@@ -149,6 +144,41 @@ class Class_loteria
                     $obj->status_loteria,
                     $obj->usuario_sistema_cadastro,
                     $obj->usuario_sistema_sorteio
+                );
+            }
+            $this->setResp($arr);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * listaJogosLoteria - método responsável por listar os jogos existentes da loteria
+     * retorna dependendo dos parâmetros todos os jogos da loteria, 
+     * todoso os jogos da loteria de um usuário específico
+     * ou ainda todos os jogos vencedores (neste caso existirá apenas um)
+     * @param $idusuario_jogos - se informado pegará os jogos do usuario
+     * @param $jogo_vencedor - se informado pegara os ou o jogo vencedor
+     */
+    public function listaJogosLoteria($idusuario_jogos = '', $jogo_vencedor = '')
+    {
+        $sql = "SELECT * FROM usuario_jogos where loteria_idloteria = {$this->getidloteria()}";
+        if ($idusuario_jogos)
+            $sql .= " and idusuario_jogos = {$idusuario_jogos}";
+        if ($idusuario_jogos)
+            $sql .= " and jogo_vencedor = {$jogo_vencedor}";
+        $this->db->query($sql);
+        if ($this->db->quantidadeRegistros() > 0) {
+            while ($obj = $this->db->fetchObj()) {
+                $arr[] = new Class_usuario_jogos(
+                    $this->db,
+                    $obj->idusuario_jogos,
+                    $obj->quant_dezenas,
+                    $obj->dezenas_escolhidas,
+                    $obj->jogo_vencedor,
+                    $obj->loteria_idloteria,
+                    $obj->usuario_sistema_idusuario_sistema
                 );
             }
             $this->setResp($arr);

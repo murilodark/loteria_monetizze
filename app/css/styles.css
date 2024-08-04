@@ -120,9 +120,10 @@ form button:hover {
 
 
 
-.link-cadastro, .link-login {
+.link-cadastro,
+.link-login {
     width: 100%;
-    padding: 0.5rem;    
+    padding: 0.5rem;
     margin: 0.5rem 0;
     color: #fff;
     border: none;
@@ -137,6 +138,7 @@ form button:hover {
 .link-cadastro {
     background-color: green;
 }
+
 .link-cadastro:hover {
     background-color: #1cf04a;
 }
@@ -144,6 +146,7 @@ form button:hover {
 .link-login {
     background-color: blue;
 }
+
 .link-login:hover {
     background-color: #08aef0;
 }
@@ -174,6 +177,62 @@ form button:hover {
     display: none;
     /* Inicialmente escondida */
 }
+
+/* Estilo geral da tabela */
+.table-container {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilo para o cabeçalho da tabela */
+th {
+    background-color: #08aef0;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+/* Estilo para as células da tabela */
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+/* Alterna a cor de fundo das linhas */
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Adiciona uma borda ao passar o mouse sobre uma linha */
+tr:hover {
+    background-color: #ddd;
+}
+
+/* Estilo do link de visualização */
+a {
+    color: #08aef0;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Estilo do link de visualização ao passar o mouse */
+a:hover {
+    text-decoration: underline;
+}
+
+/* Estilo para a tabela quando não há dados */
+#tabela-loterias {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+}
+
 
 @media (max-width: 600px) {
     form {

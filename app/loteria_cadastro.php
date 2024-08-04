@@ -28,8 +28,9 @@ include("./include_sessao_php.php")
             try {
                 const result = await handleFormSubmit(formId, url);
                 if (result.success) {
+                    const data = result.data[0];
                     //redireciona para tela visualização da loteria
-                    window.location.href = 'loteria_edita.php';
+                    window.location.href = 'loteria_visualiza.php?idloteria='+data.idloteria;
                 } else {
                     console.error('Erro:', result.message);
                 }

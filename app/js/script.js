@@ -51,7 +51,38 @@ async function handleFormSubmit(formId, url) {
     });
 }
 
-// Chame a função para cada formulário e URL correspondente
-//handleFormSubmit('dataForm1', 'https://api.exemplo.com/endpoint1');
-//handleFormSubmit('dataForm2', 'https://api.exemplo.com/endpoint2');
+
+async function consultaForm(formId, url) {
+    try {
+        const formData = new FormData(document.getElementById(formId));
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value; // Converte os dados do formulário em um objeto
+        });
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // Converte o objeto para JSON
+        });
+
+        // Verifica se a resposta foi bem-sucedida
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+
+        console.log('Resultado da API:', result); // Debug: Exibe o resultado da API
+
+        return result; // Retorna o resultado para uso posterior
+
+    } catch (error) {
+        console.error('Erro ao enviar o formulário:', error); // Lida com erros da Promise
+        document.getElementById('formLoadLoteria').innerText = 'Erro ao carregar dados.';
+        throw error; // Repassa o erro para ser tratado por funções chamadoras
+    }
+}
 

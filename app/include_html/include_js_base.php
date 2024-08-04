@@ -1,1 +1,1 @@
-<script src="js/script.js?t=<?php time()?>"></script>
+<script src="js/script.js?t=<?php echo time()?>"></script>
