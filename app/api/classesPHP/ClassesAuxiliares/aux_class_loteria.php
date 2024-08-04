@@ -318,7 +318,7 @@ class aux_class_loteria extends Class_Valida_Dados
         try {
             while (count($jogosGerados) < $this->qauntidadeJogosDisponivel) {
                 $jogo = $this->gerarJogoUnico($this->Class_usuario_jogos->getquant_dezenas());
-                
+
                 if ($this->verificarJogoUnico($jogo)) {
                     $this->salvarJogoUsuario($jogo);
                     $jogosGerados[] = $jogo;
