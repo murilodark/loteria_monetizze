@@ -75,6 +75,7 @@ if ($idloteria === false) {
 
                 // Preenche a tabela com os dados
                 dataJogos.forEach(item => {
+                    let classVencedor='';
                     if (item.jogo_vencedor == 'S') {
                         classVencedor = 'jogo-vencedor';
                     }

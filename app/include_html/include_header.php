@@ -6,7 +6,6 @@
             <ul>
                 <li><a href="loteria_lista.php">Loterias</a></li>
                 <li><a href="loteria_cadastro.php">Cadastro Loterias</a></li>
-                <li><a href="loteria_sorteio.php">Sorteio Loterias</a></li>
                 <li><a href="user_login.php">Sair</a></li>
             </ul>
         </nav>

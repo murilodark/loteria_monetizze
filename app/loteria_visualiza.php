@@ -25,7 +25,9 @@ if ($idloteria === false) {
             <input type="hidden" id="todososjogos" name="todososjogos" value="SIM">
             <input type="hidden" id="ACAO" name="ACAO" value="LOAD">
         </form>
+        
     </div>
+    <div id="error"></div>
     <div class="container">
         <div class="table-container" id="tabela-jogos">
             <table>
@@ -46,7 +48,7 @@ if ($idloteria === false) {
     <?php include("include_html/include_footer.php") ?>
     <?php include("include_html/include_js_base.php") ?>
     <script>
-         function IncluiJogosTabela(dataJogos) {
+        function IncluiJogosTabela(dataJogos) {
             if (dataJogos) {
                 //inicia a tabela de jogos caso exista
                 // Inicia a tabela de jogos caso exista
@@ -66,9 +68,9 @@ if ($idloteria === false) {
                 // Preenche a tabela com os dados
                 dataJogos.forEach(item => {
                     let classVencedor = '';
-                            if (item.jogo_vencedor == 'S') {
-                                classVencedor='jogo-vencedor';
-                            }
+                    if (item.jogo_vencedor == 'S') {
+                        classVencedor = 'jogo-vencedor';
+                    }
                     tabelaJogosHTML += `
                         <tr class="${classVencedor}">
                             <td>${item.idusuario_jogos}</td>
@@ -95,8 +97,8 @@ if ($idloteria === false) {
                 if (result.success) {
                     const data = result.data[0]; // Acessa o primeiro item do array de dados
                     const dataJogos = result.data[1]; // Jogos do usuario
-                    // Inicializa o conteúdo HTML do div
-                    let visualizaLoteriaHTML = `
+                    //carrega no html do form as informações da loteria 
+                    let visualizaLoteriaHTML = `                   
     <p><strong>ID da Loteria:</strong> ${data.idloteria || 'Não disponível'}</p>
     <p><strong>Cadastro por:</strong> ${data.usuario_sistema_cadastro || 'Não disponível'}</p>
     <p><strong>Data de Cadastro:</strong> ${data.data_cadastro || 'Não disponível'}</p>
@@ -107,13 +109,19 @@ if ($idloteria === false) {
     <p><strong>Dezenas Sorteadas:</strong> ${data.dezenas_sorteadas || 'Não disponível'}</p>
 `;
 
-                    // Condicional para adicionar os links apenas se data.data_sorteio estiver vazio
+                    // Condicional para adicionar o link de Meus Jogos e o botão para Sortea, 
+                    //inclui tambem os inputs necessários para postagem do sorteio 
                     if (data.status_loteria == "Andamento") {
                         visualizaLoteriaHTML += `
-        <a href='loteria_sorteio.php?idloteria=${data.idloteria}' class='link-login'>Efetuar Sorteio</a>
-        <a href='loteria_gera_dezenas.php?idloteria=${data.idloteria}' class='link-cadastro'>Meus Jogos</a>
-    `;
+                         <input type="hidden" id="idloteria" name="idloteria" value="${data.idloteria}">
+                    <input type="hidden" id="ACAO" name="ACAO" value="EFETUASORTEIO">
+                    <button type="submit">Efetuar Sorteio</button>
+                     `;
                     }
+                    visualizaLoteriaHTML += `
+                            <a href='loteria_gera_dezenas.php?idloteria=${data.idloteria}' class='link-cadastro'>Meus Jogos</a>
+                            
+                         `;
 
                     // Atualiza o conteúdo do div com id "formLoadLoteria"
                     const visualizaLoteria = document.getElementById('formLoadLoteria');
@@ -121,6 +129,7 @@ if ($idloteria === false) {
                     if (dataJogos) {
                         IncluiJogosTabela(dataJogos);
                     }
+
 
                 } else {
                     console.error('Erro:', result.message);
@@ -143,6 +152,26 @@ if ($idloteria === false) {
                     `;
             }
         });
+
+
+        async function enviaFormLoteria(formId, url) {
+            try {
+                const result = await handleFormSubmit(formId, url);
+                if (result.success) {
+                    const data = result.data[0];
+                    alert('Registro alterado com sucesso.');
+                    //redireciona para tela visualização da loteria
+                    window.location.href = 'loteria_visualiza.php?idloteria='+data.idloteria;
+      
+                } else {
+                    console.error('Erro:', result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar o formulário:', error); // Lida com erros da Promise
+            }
+        }
+        // Chama a função enviaFormLogin passando o ID do formulário e a URL da requisição
+        enviaFormLoteria('formLoadLoteria', 'api/api_loteria.php');
     </script>
 </body>
 

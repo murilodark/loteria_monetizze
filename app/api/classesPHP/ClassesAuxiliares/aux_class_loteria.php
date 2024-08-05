@@ -124,8 +124,21 @@ class aux_class_loteria extends Class_Valida_Dados
                 $this->setConteudo($listaJogos);
                 $this->setConteudo($arrayLimite);
                 break;
-            case "LISTATODOSJOGOS":
+            case "EFETUASORTEIO":
+                if (!$this->CarregaLoteria()) {
+                    break;
+                }
+                if (!$this->EfetuaSorteio()) {
+                    $this->setConteudo($this->getErros());
+                    return;
+                }
 
+                //converto as datas para o formato brasileiro 
+                $this->Class_loteria->setdata_cadastro($this->getDataBrasil($this->Class_loteria->getdata_cadastro()));
+                if ($this->Class_loteria->getdata_sorteio()) {
+                    $this->Class_loteria->setdata_sorteio($this->getDataBrasil($this->Class_loteria->getdata_sorteio()));
+                }
+                $this->setConteudo($this->Class_loteria->getArrayAtributos());
                 break;
 
             default:
@@ -134,9 +147,9 @@ class aux_class_loteria extends Class_Valida_Dados
         }
     }
 
-    function PegaPostsloteria()
+    private function PegaPostsloteria()
     {
-        
+
 
         $nome_loteria = $this->getParametroJson("nome_loteria", "O nome da loteria deve ser informado", true);
         $this->Class_loteria->setnome_loteria($nome_loteria);
@@ -156,7 +169,7 @@ class aux_class_loteria extends Class_Valida_Dados
         return true;
     }
 
-    function salvaloteria()
+    private function salvaloteria()
     {
         //inicia a transacao
         $this->db->transacao();
@@ -188,7 +201,83 @@ class aux_class_loteria extends Class_Valida_Dados
         return true;
     }
 
+    private function EfetuaSorteio()
+    {
+        //carrega todos os jogos da loteria
+        $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
+        if (!$this->Class_usuario_jogos->listaUsuarioJogos($extra)) {
+            $this->setErros('A loteria não pode ser sorteada, pois não existem jogos.');
+            return false;
+        }
+        //monta um array com todos os jogos e suas respectivas dezenas        
+        $Class_usuario_jogos = new Class_usuario_jogos($this->db);
+        $arrayJogos = [];
+        foreach ($this->Class_usuario_jogos->getResp() as $Class_usuario_jogos) {
+            $arrayJogos[] = [
+                "idjogo" => $Class_usuario_jogos->getidusuario_jogos(),
+                "arrayDezenas" => explode(',', $Class_usuario_jogos->getdezenas_escolhidas())
+            ];
+        }
 
+        $dezenas = range(1, 60);
+        $arrayDezenasSorteadas = [];
+        $arrayDezenasPremiadas = [];
+        $filtradosJogos = $arrayJogos; // Inicia com todos os jogos
+
+        $i = 1;
+        while ($i < 60 && count($arrayDezenasPremiadas) < 6) {
+            // Embaralha os números do array
+            shuffle($dezenas);
+            // Seleciona uma dezena específica
+            $dezenaSorteada = array_slice($dezenas, 0, 1)[0];
+
+            // Remove a dezena sorteada do array $dezenas
+            $dezenas = array_diff($dezenas, [$dezenaSorteada]);
+
+            // Adiciona a dezena sorteada ao array de dezenas sorteadas
+            if (!in_array($dezenaSorteada, $arrayDezenasSorteadas)) {
+                $arrayDezenasSorteadas[] = $dezenaSorteada;
+            }
+            // Filtra os jogos que contêm todas as dezenas sorteadas até agora
+            $filtradosJogos = array_filter($arrayJogos, function ($jogo) use ($arrayDezenasSorteadas) {
+                // Verifica se o jogo contém todas as dezenas sorteadas
+                return empty(array_diff($arrayDezenasSorteadas, $jogo['arrayDezenas']));
+            });
+            // Verifica se nenhum jogo foi encontrado
+            if (empty($filtradosJogos)) {
+                // Remove a última dezena sorteada, já que não há jogos válidos
+                // array_pop($arrayDezenasSorteadas);
+                // Reindexa o array para garantir que está ordenado
+                $arrayDezenasSorteadas = $arrayDezenasPremiadas;
+                sort($dezenas);
+            } else {
+                // Adiciona a dezena sorteada ao array de dezenas premiadas
+                $arrayDezenasPremiadas[] = $dezenaSorteada;
+            }
+            $i++;
+        }
+        sort($arrayDezenasPremiadas);
+        $stringDezenasSorteadas = implode(',', $arrayDezenasPremiadas);
+        $jogopremiado = array_values($filtradosJogos);
+         $idjogopremiado = $jogopremiado[0]['idjogo'];
+        // atualiza a loteria e o jogo premiado com as informações de sorteio
+        // inicia a transacao
+        $this->db->transacao();
+        if (!$this->Class_loteria->insereSorteioLoteria($this->getDataTime(), $stringDezenasSorteadas, $idjogopremiado)) {
+            $this->setErros("Ocorreu um erro ao cadastrar a nova loteria, tente novamente.");
+            //efetua um rollback
+            $this->db->rollback();
+            return false;
+        }
+        //efetua o commit
+        $this->db->commit();
+
+
+        // $this->setConteudo($idjogopremiado);
+        // $this->setConteudo($jogopremiado);
+        // $this->setConteudo($arrayJogos);
+        return true;
+    }
 
 
     /**
@@ -213,7 +302,7 @@ class aux_class_loteria extends Class_Valida_Dados
         }
     }
 
-    function atualizaloteria()
+    private function atualizaloteria()
     {
         if ($this->Class_loteria->atualizaloteria()) {
             return true;
@@ -250,7 +339,7 @@ class aux_class_loteria extends Class_Valida_Dados
      * Método principal para executar todas as etapas de geração de jogos do usuário
      * esse método é chamado direto pelo métod principal controle
      */
-    function IniciaGeraJogosUsuario()
+    private  function IniciaGeraJogosUsuario()
     {
         if (!$this->CarregaLoteria()) {
             return false;
@@ -283,7 +372,7 @@ class aux_class_loteria extends Class_Valida_Dados
         $this->setConteudo($listaJogos);
     }
 
-    function PegaPostsUsuarioJogos()
+    private  function PegaPostsUsuarioJogos()
     {
         if (!$quant_dezenas = $this->getParametroJson("quant_dezenas", "A quantidade de dezenas deve ser informada", true)) {
             return false;
@@ -310,7 +399,7 @@ class aux_class_loteria extends Class_Valida_Dados
      * armazena a quantidade de jogos disponível na variável da classe $this->qauntidadeJogosDisponivel
      * que será utilizada em outros métodos
      */
-    function ValidaQuantidadeJogosUsuario()
+    private  function ValidaQuantidadeJogosUsuario()
     {
         $Class_usuario_jogos = new Class_usuario_jogos($this->db);
         $extra = "  where usuario_sistema_idusuario_sistema = {$this->Class_usuario_sistema->getidusuario_sistema()}";
@@ -333,7 +422,7 @@ class aux_class_loteria extends Class_Valida_Dados
      * método responsável por validar a quantidade de dezenas que deve ser informada
      * consulta o que já foi cadastrado e verifica se é a mesma quantidade
      */
-    function ValidaNumeroDezenasJogosUsuario()
+    private  function ValidaNumeroDezenasJogosUsuario()
     {
 
         $Class_usuario_jogos = new Class_usuario_jogos($this->db);
@@ -358,7 +447,7 @@ class aux_class_loteria extends Class_Valida_Dados
      * desfazendo todas as operações de salvamento já realizadas.
      * @return boolean = true para ok e false para erro
      */
-    function GeraJogosUsuario()
+    private function GeraJogosUsuario()
     {
         $jogosGerados = [];
         //inicia a transacao

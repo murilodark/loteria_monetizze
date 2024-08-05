@@ -9,7 +9,7 @@ class Class_usuario_jogos
     private $loteria_idloteria;
     private $usuario_sistema_idusuario_sistema;
     private $db;
-    private $resp;    
+    private $resp;
     private $Class_usuario_sistema;
 
     // Construtor da classe
@@ -20,7 +20,7 @@ class Class_usuario_jogos
         $this->setdezenas_escolhidas($dezenas_escolhidas);
         $this->setjogo_vencedor($jogo_vencedor);
         $this->setloteria_idloteria($loteria_idloteria);
-        $this->setusuario_sistema_idusuario_sistema($usuario_sistema_idusuario_sistema);        
+        $this->setusuario_sistema_idusuario_sistema($usuario_sistema_idusuario_sistema);
         $this->db = $db;
         $this->Class_usuario_sistema = new Class_usuario_sistema($this->db);
     }
@@ -76,7 +76,7 @@ class Class_usuario_jogos
                         usuario_sistema_idusuario_sistema
                     ) 
                 VALUES (" . $dados . ")";
-                
+
         if ($this->db->query($sql)) {
             $this->setidusuario_jogos($this->db->ultimoId());
             return true;
@@ -85,8 +85,17 @@ class Class_usuario_jogos
         }
     }
 
-    
-    
+    public function defineJogoPremiado($idusuario_jogos)
+    {
+        $sql = "UPDATE usuario_jogos SET 
+        jogo_vencedor = 'S'
+        WHERE idusuario_jogos = '" . $idusuario_jogos . "'";
+        if ($this->db->query($sql)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public function listaUsuarioJogos($extra = "")
     {

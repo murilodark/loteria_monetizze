@@ -83,10 +83,10 @@ include("./include_sessao_php.php");
                                 <td>${item.meus_jogos || '0'}</td>
                                 <td>${item.total_jogos || '0'}</td>
                                 <td>
-                                    <a href="loteria_visualiza.php?idloteria=${item.idloteria}">Visualizar</a>
+                                    <a href="loteria_visualiza.php?idloteria=${item.idloteria}">Detalhes</a>
                                 </td>
                                 <td>
-                                    <a href="loteria_gera_dezenas.php?idloteria=${item.idloteria}">Gerar Dezenas</a>
+                                    <a href="loteria_gera_dezenas.php?idloteria=${item.idloteria}">Meus Jogos</a>
                                 </td>
                             </tr>
                         `;

@@ -32,7 +32,7 @@ class Class_loteria
         $this->Class_usuario_sistema_cadastro = new Class_usuario_sistema($this->db);
         $this->Class_usuario_sistema_sorteio = new Class_usuario_sistema($this->db);
         $this->Class_usuario_jogos = new Class_usuario_jogos($this->db);
-         $this->Class_Sessao = new Class_Sessao();
+        $this->Class_Sessao = new Class_Sessao();
     }
 
     public function getArrayAtributos()
@@ -85,8 +85,8 @@ class Class_loteria
         $dados .= "'" . $this->getdata_cadastro() . "',";
         $dados .= "'" . $this->getnome_loteria() . "',";
         $dados .= "'" . $this->getdata_sorteio() . "',";
-        $dados .= "'" . $this->getstatus_loteria() . "',";
-        $dados .= "'" . $this->getusuario_sistema_cadastro() . "'";
+        $dados .= "'Andamento',";
+        $dados .= "'" . $this->Class_Sessao->getIdUsuario() . "'";
 
         $sql = "INSERT INTO loteria (
                         data_cadastro, 
@@ -102,6 +102,23 @@ class Class_loteria
         } else {
             return false;
         }
+    }
+
+
+    public function insereSorteioLoteria($dataSorteio, $dezenas_sorteadas, $idusuario_jogos)
+    {
+        $sql = "UPDATE loteria SET 
+        data_sorteio = '" . $dataSorteio . "',
+        dezenas_sorteadas = '" . $dezenas_sorteadas . "',
+        status_loteria = 'Finalizada',
+        usuario_sistema_sorteio = '" . $this->Class_Sessao->getIdUsuario() . "'
+        WHERE idloteria = '" . $this->getidloteria() . "'";
+        if ($this->db->query($sql)) {
+            if ($this->Class_usuario_jogos->defineJogoPremiado($idusuario_jogos)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function atualizaLoteria()
