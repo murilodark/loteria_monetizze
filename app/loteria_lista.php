@@ -28,7 +28,10 @@ include("./include_sessao_php.php");
                         <th>Status</th>
                         <th>Usuário Cadastro</th>
                         <th>Usuário Sorteio</th>
-                        <th>Ação</th>
+                        <th>Meus Jogos</th>
+                        <th>Jogos Totais</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,10 +49,11 @@ include("./include_sessao_php.php");
 
                 if (result.success) {
                     const data = result.data[0]; // Acessa o primeiro item do array de dados
-
-                    // Cria a tabela HTML
-                    let tabelaHTML = `
-                        <table border="1">
+                    let tabelaHTML = '';
+                    if (Array.isArray(data)) {
+                        // Cria a tabela HTML
+                        tabelaHTML = `
+                        <table>
                             <thead>
                                 <tr>
                                     <th>ID Loteria</th>
@@ -57,33 +61,44 @@ include("./include_sessao_php.php");
                                     <th>Data Sorteio</th>
                                     <th>Nome Loteria</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>Meus Jogos</th>
+                                     <th>Jogos Totais</th>
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                     `;
 
-                    // Preenche a tabela com os dados
-                    data.forEach(item => {
-                        tabelaHTML += `
+                        // Preenche a tabela com os dados
+                        data.forEach(item => {                          
+
+                            tabelaHTML += `
                             <tr>
                                 <td>${item.idloteria}</td>
                                 <td>${item.data_cadastro}</td>
                                 <td>${item.data_sorteio || 'Não disponível'}</td>
                                 <td>${item.nome_loteria || 'Não disponível'}</td>
                                 <td>${item.status_loteria || 'Não disponível'}</td>
+                                <td>${item.meus_jogos || '0'}</td>
+                                <td>${item.total_jogos || '0'}</td>
                                 <td>
                                     <a href="loteria_visualiza.php?idloteria=${item.idloteria}">Visualizar</a>
                                 </td>
+                                <td>
+                                    <a href="loteria_gera_dezenas.php?idloteria=${item.idloteria}">Gerar Dezenas</a>
+                                </td>
                             </tr>
                         `;
-                    });
+                        });
 
-                    tabelaHTML += `
+                        tabelaHTML += `
                             </tbody>
                         </table>
                     `;
-
+                    } else {
+                        tabelaHTML = '<p>Não existem registro cadastrados</p>';
+                    }
                     // Atualiza o conteúdo da div com id "tabela-loterias" com a tabela HTML
                     const tabelaLoterias = document.getElementById('tabela-loterias');
                     tabelaLoterias.innerHTML = tabelaHTML;

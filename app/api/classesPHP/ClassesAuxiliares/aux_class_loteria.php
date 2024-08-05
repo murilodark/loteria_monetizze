@@ -11,7 +11,7 @@ class aux_class_loteria extends Class_Valida_Dados
     private $Class_Sessao;
     //variáveis utilizadas para armazenar a quantidade de jogos solicitada pelo um usuário
     //e utilizada nas funcoes relacionadas aos jogos dos usuários
-    private $quant_jogos;
+    private $qaunt_jogos_solicitados;
     private $qauntidadeJogosDisponivel;
     private $jogosGerados;
     //construtor da classe
@@ -81,6 +81,7 @@ class aux_class_loteria extends Class_Valida_Dados
                     $this->Class_loteria->setdata_sorteio($this->getDataBrasil($this->Class_loteria->getdata_sorteio()));
                 }
                 $this->setConteudo($this->Class_loteria->getArrayAtributos());
+                $this->setConteudo($this->ListarTodososJogos());
                 break;
             case "DELETE":
                 if (!$this->Excluiloteria()) {
@@ -96,46 +97,32 @@ class aux_class_loteria extends Class_Valida_Dados
                     break;
                 }
                 $this->setConteudo($listaloteria);
+                $this->setConteudo($this->ListarTodososJogos());
                 break;
 
             case "GERAJOGO":
-                if (!$this->CarregaLoteria()) {
-                    break;
-                }
-                if (!$this->PegaPostsUsuarioJogos()) {
-                    $this->setConteudo($this->getErros());
-                    break;
-                }
-                if (!$this->ValidaQuantidadeJogosUsuario()) {
-                    $this->setConteudo($this->getErros());
-                    break;
-                }
-                if (!$this->GeraJogosUsuario()) {
-                    $this->setConteudo($this->getErros());
-                    break;
-                }
-
-                $listaJogos = $this->ListarJogoUsuario();
-                if (!$listaJogos) {
-                    $this->setConteudo($this->getErros());
-                    break;
-                }
-                $this->setConteudo($listaJogos);
-                break;
-
-                $this->setConteudo($this->Class_loteria->getArrayAtributos());
+                $this->IniciaGeraJogosUsuario();
                 break;
 
             case "LISTAJOGOSUSUARIO":
-                $listaJogos = $this->ListarJogoUsuario();
-                if (!$listaJogos) {
-                    $this->setConteudo($this->getErros());
+                if (!$this->CarregaLoteria()) {
                     break;
                 }
-                $this->setConteudo($listaJogos);
-                break;
+                //converto as datas para o formato brasileiro 
+                $this->Class_loteria->setdata_cadastro($this->getDataBrasil($this->Class_loteria->getdata_cadastro()));
+                if ($this->Class_loteria->getdata_sorteio()) {
+                    $this->Class_loteria->setdata_sorteio($this->getDataBrasil($this->Class_loteria->getdata_sorteio()));
+                }
+                $listaJogos = $this->ListarJogoUsuario();
+                $jogosrealizados = 0;
+                if ($listaJogos) {
+                    $jogosrealizados = count($listaJogos);
+                }
 
+                $arrayLimite = ["jogosrealizados" => $jogosrealizados, "limiteJogo" => 50 - $jogosrealizados];
                 $this->setConteudo($this->Class_loteria->getArrayAtributos());
+                $this->setConteudo($listaJogos);
+                $this->setConteudo($arrayLimite);
                 break;
             case "LISTATODOSJOGOS":
 
@@ -149,8 +136,7 @@ class aux_class_loteria extends Class_Valida_Dados
 
     function PegaPostsloteria()
     {
-        // $data_cadastro = $this->getParametroJson("data_cadastro", "A data de cadastro deve ser informada", true);
-        // $this->Class_loteria->setdata_cadastro($data_cadastro);
+        
 
         $nome_loteria = $this->getParametroJson("nome_loteria", "O nome da loteria deve ser informado", true);
         $this->Class_loteria->setnome_loteria($nome_loteria);
@@ -164,19 +150,6 @@ class aux_class_loteria extends Class_Valida_Dados
             return false;
         }
         $this->Class_loteria->setdata_sorteio($data_sorteio);
-
-
-        // $dezenas_sorteadas = $this->getParametroJson("dezenas_sorteadas", "As dezenas sorteadas devem ser informadas", true);
-        // $this->Class_loteria->setdezenas_sorteadas($dezenas_sorteadas);
-
-        // $status_loteria = $this->getParametroJson("status_loteria", "O status da loteria deve ser informado", true);
-        // $this->Class_loteria->setstatus_loteria($status_loteria);
-
-        // $usuario_sistema_cadastro = $this->getParametroJson("usuario_sistema_cadastro", "O usuário do sistema que cadastrou deve ser informado", true);
-        // $this->Class_loteria->setusuario_sistema_cadastro($usuario_sistema_cadastro);
-
-        // $usuario_sistema_sorteio = $this->getParametroJson("usuario_sistema_sorteio", "O usuário do sistema que sorteou deve ser informado", true);
-        // $this->Class_loteria->setusuario_sistema_sorteio($usuario_sistema_sorteio);
         if ($this->getErros()) {
             return false;
         }
@@ -215,6 +188,31 @@ class aux_class_loteria extends Class_Valida_Dados
         return true;
     }
 
+
+
+
+    /**
+     * Método responsável por listar todos os jogos 
+     * de todos os usuários de uma loteria
+     */
+    private function ListarTodososJogos()
+    {
+        $todososjogos = $this->getParametroJson("todososjogos");
+        $arrayAtributos = '';
+        if ($todososjogos == 'SIM') {
+            $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
+            if (!$this->Class_usuario_jogos->listaUsuarioJogos($extra)) {
+                return false;
+            }
+            $Class_usuario_jogos = new Class_usuario_jogos($this->db);
+            $arrayAtributos = [];
+            foreach ($this->Class_usuario_jogos->getResp() as $Class_usuario_jogos) {
+                $arrayAtributos[] = $Class_usuario_jogos->getArrayAtributos();
+            }
+            return $arrayAtributos;
+        }
+    }
+
     function atualizaloteria()
     {
         if ($this->Class_loteria->atualizaloteria()) {
@@ -236,13 +234,11 @@ class aux_class_loteria extends Class_Valida_Dados
 
     private function Listaloteria()
     {
-
+        $arrayAtributos = [];
         if (!$this->Class_loteria->listaloteria()) {
-            $this->setErros("Não existem registros cadastrados para 'loteria'.");
-            return false;
+            return $arrayAtributos;
         }
         $Class_loteria = new Class_loteria($this->db);
-        $arrayAtributos = [];
         foreach ($this->Class_loteria->getResp() as  $Class_loteria) {
             $arrayAtributos[] = $Class_loteria->getArrayAtributos();
         }
@@ -250,18 +246,55 @@ class aux_class_loteria extends Class_Valida_Dados
     }
 
 
+    /**
+     * Método principal para executar todas as etapas de geração de jogos do usuário
+     * esse método é chamado direto pelo métod principal controle
+     */
+    function IniciaGeraJogosUsuario()
+    {
+        if (!$this->CarregaLoteria()) {
+            return false;
+        }
+        if (!$this->PegaPostsUsuarioJogos()) {
+            $this->setConteudo($this->getErros());
+            return false;
+        }
+        if (!$this->ValidaQuantidadeJogosUsuario()) {
+            $this->setConteudo($this->getErros());
+            return false;
+        }
+        //verifica se a quantidade de jogos é maior que zero, se sim valida a quantidade de dezenas
+        if ($this->qauntidadeJogosDisponivel < 50) {
+            if (!$this->ValidaNumeroDezenasJogosUsuario()) {
+                $this->setConteudo($this->getErros());
+                return false;
+            }
+        }
+        if (!$this->GeraJogosUsuario()) {
+            $this->setConteudo($this->getErros());
+            return false;
+        }
+        $listaJogos = $this->ListarJogoUsuario();
+        if (!$listaJogos) {
+            $this->setConteudo($this->getErros());
+            return false;
+        }
+        $this->setConteudo($this->Class_loteria->getArrayAtributos());
+        $this->setConteudo($listaJogos);
+    }
+
     function PegaPostsUsuarioJogos()
     {
         if (!$quant_dezenas = $this->getParametroJson("quant_dezenas", "A quantidade de dezenas deve ser informada", true)) {
             return false;
         }
-        if (!$this->quant_jogos = $this->getParametroJson("quant_jogos", "A quantidade de dezenas deve ser informada", true)) {
+        if (!$this->qaunt_jogos_solicitados = $this->getParametroJson("quant_jogos", "A quantidade de dezenas deve ser informada", true)) {
             return false;
         }
         if ($quant_dezenas < 6 || $quant_dezenas > 10) {
             $this->setErros('A quantidade de dezenas deve estar entre 6 e 10.');
         }
-        if ($this->quant_jogos < 1 || $this->quant_jogos > 50) {
+        if ($this->qaunt_jogos_solicitados < 1 || $this->qaunt_jogos_solicitados > 50) {
             $this->setErros('A quantidade de jogos deve estar entre 1 e 50.');
         }
         $this->Class_usuario_jogos->setquant_dezenas($quant_dezenas);
@@ -270,10 +303,6 @@ class aux_class_loteria extends Class_Valida_Dados
         }
         return true;
     }
-
-
-
-
     /**
      * método responsável por validade a quantidade de jogos que estão disponível
      * para um determinado usuário e uma loteria específica.
@@ -283,20 +312,39 @@ class aux_class_loteria extends Class_Valida_Dados
      */
     function ValidaQuantidadeJogosUsuario()
     {
-
+        $Class_usuario_jogos = new Class_usuario_jogos($this->db);
         $extra = "  where usuario_sistema_idusuario_sistema = {$this->Class_usuario_sistema->getidusuario_sistema()}";
         $extra .= "  and loteria_idloteria = {$this->Class_loteria->getidloteria()}";
-        $qauntidadeJogosJaEfetuado = $this->Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos($extra);
+        $qauntidadeJogosJaEfetuado =  $Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos($extra);
         if ($qauntidadeJogosJaEfetuado >= 50) {
             $this->setErros('Limite de 50 já atingindo.');
             return false;
         }
         $qauntidadeJogosDisponivel = 50 - $qauntidadeJogosJaEfetuado;
-        if ($qauntidadeJogosDisponivel < $this->quant_jogos) {
+        if ($qauntidadeJogosDisponivel < $this->qaunt_jogos_solicitados) {
             $this->setErros("O seu limite de jogos disponível para essa loteria é de {$qauntidadeJogosDisponivel}, altere e tente novamente.");
             return false;
         }
         $this->qauntidadeJogosDisponivel = $qauntidadeJogosDisponivel;
+        return true;
+    }
+
+    /**
+     * método responsável por validar a quantidade de dezenas que deve ser informada
+     * consulta o que já foi cadastrado e verifica se é a mesma quantidade
+     */
+    function ValidaNumeroDezenasJogosUsuario()
+    {
+
+        $Class_usuario_jogos = new Class_usuario_jogos($this->db);
+        $extra = "  where usuario_sistema_idusuario_sistema = {$this->Class_usuario_sistema->getidusuario_sistema()}";
+        $extra .= "  and loteria_idloteria = {$this->Class_loteria->getidloteria()}";
+        if ($Class_usuario_jogos->carregaUsuarioJogos('', $extra)) {
+            if ($this->Class_usuario_jogos->getquant_dezenas() != $Class_usuario_jogos->getquant_dezenas()) {
+                $this->setErros('Você já efetuou jogos para essa loteria e a quantidade de dezenas deve ser de ' . $Class_usuario_jogos->getquant_dezenas());
+                return false;
+            }
+        }
         return true;
     }
 
@@ -316,7 +364,7 @@ class aux_class_loteria extends Class_Valida_Dados
         //inicia a transacao
         $this->db->transacao();
         try {
-            while (count($jogosGerados) < $this->qauntidadeJogosDisponivel) {
+            while (count($jogosGerados) < $this->qaunt_jogos_solicitados) {
                 $jogo = $this->gerarJogoUnico($this->Class_usuario_jogos->getquant_dezenas());
 
                 if ($this->verificarJogoUnico($jogo)) {
@@ -366,7 +414,7 @@ class aux_class_loteria extends Class_Valida_Dados
     private function verificarJogoUnico($dezenas_escolhidas)
     {
         $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
-        $extra .= "  and dezenas_escolhidas = {$dezenas_escolhidas}";
+        $extra .= "  and dezenas_escolhidas = '{$dezenas_escolhidas}'";
         $quantidade = $this->Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos($extra);
         if ($quantidade > 0) {
             return false;
@@ -395,10 +443,10 @@ class aux_class_loteria extends Class_Valida_Dados
     private function ListarJogoUsuario()
     {
 
-        $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
+        $extra = "  where usuario_sistema_idusuario_sistema = {$this->Class_usuario_sistema->getidusuario_sistema()}";
+        $extra .= "  and loteria_idloteria = {$this->Class_loteria->getidloteria()}";
 
         if (!$this->Class_usuario_jogos->listaUsuarioJogos($extra)) {
-            $this->setErros("Não existem registros cadastrados para 'jogos'.");
             return false;
         }
         $Class_usuario_jogos = new Class_usuario_jogos($this->db);

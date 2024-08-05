@@ -9,7 +9,8 @@ class Class_usuario_jogos
     private $loteria_idloteria;
     private $usuario_sistema_idusuario_sistema;
     private $db;
-    private $resp;
+    private $resp;    
+    private $Class_usuario_sistema;
 
     // Construtor da classe
     public function __construct($db = "", $idusuario_jogos = "", $quant_dezenas = "", $dezenas_escolhidas = "", $jogo_vencedor = "", $loteria_idloteria = "", $usuario_sistema_idusuario_sistema = "")
@@ -19,12 +20,14 @@ class Class_usuario_jogos
         $this->setdezenas_escolhidas($dezenas_escolhidas);
         $this->setjogo_vencedor($jogo_vencedor);
         $this->setloteria_idloteria($loteria_idloteria);
-        $this->setusuario_sistema_idusuario_sistema($usuario_sistema_idusuario_sistema);
+        $this->setusuario_sistema_idusuario_sistema($usuario_sistema_idusuario_sistema);        
         $this->db = $db;
+        $this->Class_usuario_sistema = new Class_usuario_sistema($this->db);
     }
 
     public function getArrayAtributos()
     {
+        $this->Class_usuario_sistema->carregausuario_sistema($this->getusuario_sistema_idusuario_sistema());
         return [
             'idusuario_jogos' => $this->getidusuario_jogos(),
             'quant_dezenas' => $this->getquant_dezenas(),
@@ -32,6 +35,7 @@ class Class_usuario_jogos
             'jogo_vencedor' => $this->getjogo_vencedor(),
             'loteria_idloteria' => $this->getloteria_idloteria(),
             'usuario_sistema_idusuario_sistema' => $this->getusuario_sistema_idusuario_sistema(),
+            'nome_usuario' =>  $this->Class_usuario_sistema->getnome_usuario()
         ];
     }
 
@@ -72,6 +76,7 @@ class Class_usuario_jogos
                         usuario_sistema_idusuario_sistema
                     ) 
                 VALUES (" . $dados . ")";
+                
         if ($this->db->query($sql)) {
             $this->setidusuario_jogos($this->db->ultimoId());
             return true;

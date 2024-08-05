@@ -15,6 +15,7 @@ class Class_loteria
     private $Class_usuario_sistema_cadastro;
     private $Class_usuario_sistema_sorteio;
     private $Class_usuario_jogos;
+    private $Class_Sessao;
 
     // Construtor da classe
     public function __construct($db = "", $idloteria = "", $data_cadastro = "", $data_sorteio = "", $nome_loteria = "", $dezenas_sorteadas = "", $status_loteria = "", $usuario_sistema_cadastro = "", $usuario_sistema_sorteio = "")
@@ -31,6 +32,7 @@ class Class_loteria
         $this->Class_usuario_sistema_cadastro = new Class_usuario_sistema($this->db);
         $this->Class_usuario_sistema_sorteio = new Class_usuario_sistema($this->db);
         $this->Class_usuario_jogos = new Class_usuario_jogos($this->db);
+         $this->Class_Sessao = new Class_Sessao();
     }
 
     public function getArrayAtributos()
@@ -44,6 +46,8 @@ class Class_loteria
             'status_loteria' => $this->getstatus_loteria(),
             'usuario_sistema_cadastro' => $this->Class_usuario_sistema_cadastro->getnome_usuario(),
             'usuario_sistema_sorteio' =>  $this->Class_usuario_sistema_sorteio->getnome_usuario(),
+            'total_jogos' =>  $this->Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos("where loteria_idloteria = {$this->getidloteria()}"),
+            'meus_jogos' =>  $this->Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos("where loteria_idloteria = {$this->getidloteria()} and usuario_sistema_idusuario_sistema = {$this->Class_Sessao->getIdUsuario()}")
         ];
     }
 

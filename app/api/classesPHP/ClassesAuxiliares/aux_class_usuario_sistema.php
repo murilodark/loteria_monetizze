@@ -50,12 +50,7 @@ class aux_class_usuario_sistema extends Class_Valida_Dados
                 }
                 $this->setConteudo($this->aux_class_gerencia_permissao->getArrayUsuarios());
                 break;
-            case "INSERT":
-
-                $this->setConteudo($this->aux_class_gerencia_permissao->getArrayUsuarios());
-                break;
-
-
+            case "INSERT":                
                 if (!$this->PegaPostsusuario_sistema()) {
                     $this->setConteudo($this->getErros());
                     break;

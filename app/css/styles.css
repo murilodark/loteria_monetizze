@@ -67,7 +67,7 @@ footer {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 1rem;
 }
 
@@ -173,7 +173,8 @@ form button:hover {
 #error {
     text-align: center;
     color: red;
-    margin-top: 20px;
+    /* margin-top: 20px; */
+    margin-bottom: 20px;
     display: none;
     /* Inicialmente escondida */
 }
@@ -232,7 +233,9 @@ a:hover {
     font-size: 1.2em;
     color: #555;
 }
-
+.jogo-vencedor{
+    background-color: #1cf04a  !important;
+}
 
 @media (max-width: 600px) {
     form {

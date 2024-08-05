@@ -1,12 +1,14 @@
-<?php 
-include("./include_sessao_php.php") 
+<?php
+include("./include_sessao_php.php")
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <?php include("include_html/include_metas_base.php") ?>
     <title>Cadastro - Loteria</title>
 </head>
+
 <body>
     <?php include("include_html/include_header.php") ?>
     <div class="container">
@@ -32,6 +34,19 @@ include("./include_sessao_php.php")
         async function enviaFormCadastro(formId, url) {
             try {
                 const result = await handleFormSubmit(formId, url);
+                if (result.success) {
+                    const data = result.data[0];
+                    cadastroHTML = `
+                     <p><strong>Olá ${data.nome_usuario}! Cadastro realizado com sucesso!</strong></p>
+        <a href='user_login.php' class='link-login'>Efetuar Login</a>
+        <a href='user_cadastro.php' class='link-cadastro'>Novo Cadastro</a>
+    `;
+                    // Atualiza o conteúdo do div com id "formLoadLoteria"
+                    const newForm = document.getElementById(formId);
+                    newForm.innerHTML = cadastroHTML;
+                } else {
+                    console.error('Erro:', result.message);
+                }
                 // console.log(result); // Mostra o resultado no console
             } catch (error) {
                 console.error('Erro ao enviar o formulário:', error); // Lida com erros da Promise

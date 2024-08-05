@@ -56,6 +56,7 @@ class Class_Valida_Dados extends Class_Erros
     public function getParametroJson($val, $msg_erro = '', $obrigatorio = false, $tipoParametro = 'string')
     {
 
+        $parametro = '';
         if ($obrigatorio) {
             if (array_key_exists($val, $this->dataJson)) {
                 $parametro = filter_var($this->dataJson[$val], FILTER_SANITIZE_SPECIAL_CHARS);
@@ -67,6 +68,10 @@ class Class_Valida_Dados extends Class_Erros
             } else {
                 $this->setErros($msg_erro);
                 return false;
+            }
+        } else {
+            if (array_key_exists($val, $this->dataJson)) {
+                $parametro = filter_var($this->dataJson[$val], FILTER_SANITIZE_SPECIAL_CHARS);
             }
         }
         return $parametro;

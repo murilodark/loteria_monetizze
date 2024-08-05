@@ -53,6 +53,12 @@ async function handleFormSubmit(formId, url) {
 
 
 async function consultaForm(formId, url) {
+    const loadingElement = document.getElementById('loading');
+    const errorElement = document.getElementById('error');
+    // Mostra o elemento de carregamento e esconde o elemento de erro
+    loadingElement.style.display = 'flex';
+    errorElement.style.display = 'none';
+    errorElement.textContent = '';
     try {
         const formData = new FormData(document.getElementById(formId));
         const data = {};
@@ -81,8 +87,12 @@ async function consultaForm(formId, url) {
 
     } catch (error) {
         console.error('Erro ao enviar o formulário:', error); // Lida com erros da Promise
-        document.getElementById('formLoadLoteria').innerText = 'Erro ao carregar dados.';
+        errorElement.textContent = `Erro: ${error.message}`;
+        errorElement.style.display = 'block';
         throw error; // Repassa o erro para ser tratado por funções chamadoras
+    } finally {
+        // Esconde o elemento de carregamento
+        loadingElement.style.display = 'none';
     }
 }
 
