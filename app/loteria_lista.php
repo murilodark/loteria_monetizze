@@ -83,7 +83,7 @@ include("./include_sessao_php.php");
                                 <td>${item.meus_jogos || '0'}</td>
                                 <td>${item.total_jogos || '0'}</td>
                                 <td>
-                                    <a href="loteria_visualiza.php?idloteria=${item.idloteria}">Detalhes</a>
+                                    <a href="loteria_visualiza.php?idloteria=${item.idloteria}">Detalhes/Sorteio</a>
                                 </td>
                                 <td>
                                     <a href="loteria_gera_dezenas.php?idloteria=${item.idloteria}">Meus Jogos</a>

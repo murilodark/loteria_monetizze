@@ -169,6 +169,7 @@ if ($idloteria === false) {
                 const result = await handleFormSubmit(formId, url);
                 if (result.success) {
                     const data = result.data[0];
+                    alert('Jogos gerados com sucesso.');
                     //efetua um reload
                     window.location.href = 'loteria_gera_dezenas.php?idloteria=' + data.idloteria;
                 } else {
