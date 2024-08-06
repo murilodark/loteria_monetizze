@@ -16,7 +16,8 @@ if (basename($_SERVER["PHP_SELF"]) == basename(__FILE__)) {
 }
 
 class DB {
-    private static $server = 'db'; // Nome do serviço definido no docker-compose.yml
+    // Nome do serviço definido no docker-compose.yml
+    private static $server = 'db'; 
     private static $usuario = 'username';
     private static $senha = 'userpass';
     private static $banco = 'dbloteria';
