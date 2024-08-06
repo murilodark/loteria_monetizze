@@ -336,15 +336,15 @@ class aux_class_loteria extends Class_Valida_Dados
     {
         // atualiza a loteria e o jogo premiado com as informações de sorteio
         // inicia a transacao
-        // $this->db->transacao();
-        // if (!$this->Class_loteria->insereSorteioLoteria($this->getDataTime(), $stringDezenasSorteadas, $idjogopremiado)) {
-        //     $this->setErros("Ocorreu um erro ao salvar o sorteio da loteria, tente novamente.");
-        //     //efetua um rollback
-        //     $this->db->rollback();
-        //     return false;
-        // }
-        // //efetua o commit
-        // $this->db->commit();
+        $this->db->transacao();
+        if (!$this->Class_loteria->insereSorteioLoteria($this->getDataTime(), $stringDezenasSorteadas, $idjogopremiado)) {
+            $this->setErros("Ocorreu um erro ao salvar o sorteio da loteria, tente novamente.");
+            //efetua um rollback
+            $this->db->rollback();
+            return false;
+        }
+        //efetua o commit
+        $this->db->commit();
         return true;
     }
 

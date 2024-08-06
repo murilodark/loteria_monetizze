@@ -161,7 +161,7 @@ if ($idloteria === false) {
                     const data = result.data[0];
                     alert('Registro alterado com sucesso.');
                     //redireciona para tela visualização da loteria
-                    // window.location.href = 'loteria_visualiza.php?idloteria=' + data.idloteria;
+                    window.location.href = 'loteria_visualiza.php?idloteria=' + data.idloteria;
 
                 } else {
                     console.error('Erro:', result.message);
