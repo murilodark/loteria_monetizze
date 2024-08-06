@@ -4,24 +4,13 @@
 **/.git
 **/.gitignore
 **/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/bin
-**/charts
-**/docker-compose*
-**/compose*
-**/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
-**/secrets.dev.yaml
-**/values.dev.yaml
-LICENSE
-README.md
+# Ignora arquivos e diretórios comuns que não são necessários para o build
+node_modules
+vendor
+.dockerignore
+.git
+.gitignore
+.env
+*.md
 documentacao
 

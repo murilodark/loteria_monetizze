@@ -1,0 +1,17 @@
+{
+    "name": "loteria/app",
+    "description": "desafio monetizze",
+    "autoload": {
+        "psr-4": {
+            "": "api/"
+        }
+    },
+    "authors": [
+        {
+            "name": "murilo dark"
+        }
+    ],
+    "require": {
+         "phpunit/phpunit": "^11.3"
+    }
+}

@@ -10,7 +10,7 @@
  *
  * @author darksp
  */
-require_once("classesPHP/ClassesFuncionais/Class_Erros.php");
+// require_once("classesPHP/ClassesFuncionais/Class_Erros.php");
 
 //require_once("classesPHP/ClassesFuncionais/rmv_olirum.php");
 class Class_Valida_Dados extends Class_Erros

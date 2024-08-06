@@ -29,3 +29,30 @@ pela configuração horiginal do projeto o acesso se dá através do endereço
 http://localhost:8989/
 
 Efetue o cadastro e continue navegando pela funcionalidades.
+
+
+
+#instruções para os teste:
+Após rodar o docker-compose.yml, deve acessar o container do mesmo
+#para acessar o container 
+docker exec -it loterias-app-1 bash
+
+
+#verificar se o composer foi configurado verificando a versao
+(essa instlação está definido nos arquivos do docker dockerfile)
+composer --version
+
+#se não estiver configurado, instaleo manualemnte 
+curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+#confirme através da verificao da versão
+composer --version
+
+#instale agora o phpunit
+composer require --dev phpunit/phpunit
+
+#agora que foi instalado, utilize o comando
+vendor/bin/phpunit --colors=always
+para rodar os testes que estão localizados no diretório app/tests
+
+
+

@@ -60,7 +60,7 @@ class aux_class_usuario_jogos extends Class_Valida_Dados
         if ($this->Class_loteria->getdata_sorteio()) {
             $this->Class_loteria->setdata_sorteio($this->getDataBrasil($this->Class_loteria->getdata_sorteio()));
         }
-        
+
         switch ($ACAO) {
 
             case "GERAJOGO":
@@ -212,84 +212,73 @@ class aux_class_usuario_jogos extends Class_Valida_Dados
      */
     private function GeraJogosUsuario()
     {
-        $jogosGerados = [];
-        //inicia a transacao
-        $this->db->transacao();
-        try {
-            while (count($jogosGerados) < $this->qaunt_jogos_solicitados) {
-                $jogo = $this->gerarJogoUnico($this->Class_usuario_jogos->getquant_dezenas());
-
-                if ($this->verificarJogoUnico($jogo)) {
-                    $this->salvarJogoUsuario($jogo);
-                    $jogosGerados[] = $jogo;
-                }
+        $listaJogosJaGeradoUsuarios = $this->ListarJogosTodosUsuario();
+        $listaDezenasJaGeradas = [];
+        if (is_array($listaJogosJaGeradoUsuarios)) {
+            foreach ($listaJogosJaGeradoUsuarios as $jogo) {
+                $listaDezenasJaGeradas[] = $jogo["dezenas_escolhidas"];
             }
-        } catch (exception $e) {
-            $this->setErros($e->getMessage());
-            //efetua um rollback
-            $this->db->rollback();
+        }
+        $jogosGerados = $this->gerarJogosUnicos($this->Class_usuario_jogos->getquant_dezenas(), $this->qaunt_jogos_solicitados, $listaDezenasJaGeradas);
+        if (!$this->salvarJogosUsuarios($jogosGerados)) {
             return false;
         }
-        //efetua o commit
-        $this->db->commit();
+        return true;
+    }
+
+
+    /**
+     * Método responsável por gerar uma os jogos únicos do usuário
+     * recebe os jogos já gerados anteriormente e gera novos sem se repetir
+     * @param int $quantidadeDezenas = quantidade de dezenas em cada jogo
+     * @param int $qaunt_jogos_solicitados = a quantidade de novos jogos a ser gerado
+     * @param array $listaDezenasJaGeradas = array contendo a listagem de jogos gerados anteriormente
+     */
+    private function gerarJogosUnicos($quantidadeDezenas, $qaunt_jogos_solicitados, $listaDezenasJaGeradas)
+    {
+        $jogosGerados = array();
+
+        while (count($jogosGerados) < $qaunt_jogos_solicitados) {
+            $stringDezenas_escolhidas = '';
+            // Cria um array contendo os números de 1 a 60
+            $dezenas = range(1, 60);
+            // Embaralha os números do array
+            shuffle($dezenas);
+            // Seleciona uma quantidade específica 
+            $dezenas_escolhidas = array_slice($dezenas, 0, $quantidadeDezenas);
+            // Ordena os números selecionados em ordem crescente
+            sort($dezenas_escolhidas);
+            $stringDezenas_escolhidas =  implode(',', $dezenas_escolhidas);
+
+            // Verifica se a $stringDezenas_escolhidas não existe no array $listaDezenasJaGeradas
+            if (!in_array($stringDezenas_escolhidas, $listaDezenasJaGeradas)) {
+                // Adiciona a nova combinação ao array de jogos gerados
+                $jogosGerados[] = $stringDezenas_escolhidas;
+                // Adiciona a nova combinação ao array de dezenas já geradas
+                $listaDezenasJaGeradas[] = $stringDezenas_escolhidas;
+            }
+        }
+        return $jogosGerados;
+    }
+
+
+    /**
+     * Método responsável por salvar no db os novos jogos gerados
+     * e armazena os mesmos na varivel superior  $this->jogosGerados
+     */
+    function salvarJogosUsuarios($jogosGerados)
+    {
+        // Percorre o array $jogosGerados
+        foreach ($jogosGerados as $jogo) {
+            $this->Class_usuario_jogos->setdezenas_escolhidas($jogo);
+            $this->Class_usuario_jogos->setloteria_idloteria($this->Class_loteria->getidloteria());
+            $this->Class_usuario_jogos->setusuario_sistema_idusuario_sistema($this->Class_usuario_sistema->getidusuario_sistema());
+            if (!$this->Class_usuario_jogos->insereUsuarioJogos()) {
+                $this->setErros('Erro ao inserir os jogos gerados, tente novamente.');
+                return false;
+            }
+        }
         $this->jogosGerados = $jogosGerados;
-        return true;
-    }
-
-
-    /**
-     * Método responsável por gerar um jogo único na quantidade de dezenas especificada
-     * O método não faz a validação junto ao banco dos jogos já gerados,
-     * essa validação será feita por outro método 
-     * o método $this->verificarJogoUnico($dezenas_escolhidas)
-     */
-    private function gerarJogoUnico($quantidadeDezenas)
-    {
-        // Cria um array contendo os números de 1 a 60
-        $dezenas = range(1, 60);
-        // Embaralha os números do array
-        shuffle($dezenas);
-        // Seleciona uma quantidade específica 
-        $dezenas_escolhidas = array_slice($dezenas, 0, $quantidadeDezenas);
-        // Ordena os números selecionados em ordem crescente
-        sort($dezenas_escolhidas);
-        // Converte o array em uma string
-        return implode(',', $dezenas_escolhidas);
-    }
-
-
-    /**
-     * Método responsável por efetuar a validação de um jogo gerado (dezenas_escolhidas),
-     * Essa validação e efetuada através de uma consulta na db,
-     * O jogo deve ser único para uma loteria específica.
-     */
-    private function verificarJogoUnico($dezenas_escolhidas)
-    {
-        $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
-        $extra .= "  and dezenas_escolhidas = '{$dezenas_escolhidas}'";
-        $quantidade = $this->Class_usuario_jogos->retornaQuantidadeRegistrosUsuarioJogos($extra);
-        if ($quantidade > 0) {
-            return false;
-        }
-        return true;
-    }
-
-
-    /**
-     * Método responsável por salvar no db um jogo da loteria
-     * recebe as dezenas escolhidas ou jogo e inclui os demais 
-     * parâmetros antes de salvar.
-     */
-    function salvarJogoUsuario($dezenas_escolhidas)
-    {
-
-        $this->Class_usuario_jogos->setdezenas_escolhidas($dezenas_escolhidas);
-        $this->Class_usuario_jogos->setloteria_idloteria($this->Class_loteria->getidloteria());
-        $this->Class_usuario_jogos->setusuario_sistema_idusuario_sistema($this->Class_usuario_sistema->getidusuario_sistema());
-        if (!$this->Class_usuario_jogos->insereUsuarioJogos()) {
-            throw new exception('Erro ao inserir os jogos gerados, tente novamente.');
-        }
-        $this->jogosGerados[] = $this->Class_usuario_jogos->getArrayAtributos();
         return true;
     }
 
@@ -303,7 +292,23 @@ class aux_class_usuario_jogos extends Class_Valida_Dados
             return false;
         }
         $Class_usuario_jogos = new Class_usuario_jogos($this->db);
-        $arrayAtributos = [];
+        $arrayAtributos = array();
+        foreach ($this->Class_usuario_jogos->getResp() as $Class_usuario_jogos) {
+            $arrayAtributos[] = $Class_usuario_jogos->getArrayAtributos();
+        }
+        return $arrayAtributos;
+    }
+
+    private function ListarJogosTodosUsuario()
+    {
+
+        $extra = "  where loteria_idloteria = {$this->Class_loteria->getidloteria()}";
+
+        if (!$this->Class_usuario_jogos->listaUsuarioJogos($extra)) {
+            return false;
+        }
+        $Class_usuario_jogos = new Class_usuario_jogos($this->db);
+        $arrayAtributos = array();
         foreach ($this->Class_usuario_jogos->getResp() as $Class_usuario_jogos) {
             $arrayAtributos[] = $Class_usuario_jogos->getArrayAtributos();
         }
