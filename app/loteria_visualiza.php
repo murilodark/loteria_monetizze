@@ -25,7 +25,7 @@ if ($idloteria === false) {
             <input type="hidden" id="todososjogos" name="todososjogos" value="SIM">
             <input type="hidden" id="ACAO" name="ACAO" value="LOAD">
         </form>
-        
+
     </div>
     <div id="error"></div>
     <div class="container">
@@ -161,8 +161,8 @@ if ($idloteria === false) {
                     const data = result.data[0];
                     alert('Registro alterado com sucesso.');
                     //redireciona para tela visualização da loteria
-                    window.location.href = 'loteria_visualiza.php?idloteria='+data.idloteria;
-      
+                    // window.location.href = 'loteria_visualiza.php?idloteria=' + data.idloteria;
+
                 } else {
                     console.error('Erro:', result.message);
                 }

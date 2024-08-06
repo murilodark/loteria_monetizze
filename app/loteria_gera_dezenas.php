@@ -30,7 +30,7 @@ if ($idloteria === false) {
                 <input type="number" id="quant_jogos" name="quant_jogos" required>
                 <input type="hidden" id="idloteria" name="idloteria" value="<?php echo $idloteria ?>" required>
                 <input type="hidden" id="erroid" name="erroid" value="<?php echo $erroid ?>">
-                <input type="hidden" id="ACAO" name="ACAO" value="LISTAJOGOSUSUARIO">
+                <input type="hidden" id="ACAO" name="ACAO" value="LISTAJOGO">
                 <button type="submit">Gerar Jogos</button>
 
             </div>
@@ -154,7 +154,7 @@ if ($idloteria === false) {
         document.addEventListener('DOMContentLoaded', function() {
             if (!document.getElementById('erroid').value) {
                 console.log('Página carregada, iniciando consulta...');
-                consultaLoteria('formGeraJogosLoteria', 'api/api_loteria.php', 'campos-info', 'campos-gera');
+                consultaLoteria('formGeraJogosLoteria', 'api/api_usuario_jogo.php', 'campos-info', 'campos-gera');
             } else {
                 const visualizaLoteria = document.getElementById('formGeraJogosLoteria');
                 visualizaLoteria.innerHTML = `
@@ -172,16 +172,14 @@ if ($idloteria === false) {
                     alert('Jogos gerados com sucesso.');
                     //efetua um reload
                     window.location.href = 'loteria_gera_dezenas.php?idloteria=' + data.idloteria;
-                } else {
-                    console.error('Erro:', result.message);
-                }
+                } 
             } catch (error) {
                 console.error('Erro ao enviar o formulário:', error.message); // Lida com erros da Promise
             }
         }
 
         // Chama a função enviaFormLogin passando o ID do formulário e a URL da requisição
-        enviaFormGeraJogos('formGeraJogosLoteria', 'api/api_loteria.php');
+        enviaFormGeraJogos('formGeraJogosLoteria', 'api/api_usuario_jogo.php');
     </script>
 </body>
 
