@@ -87,6 +87,8 @@ class aux_class_loteria extends Class_Valida_Dados
                 }
                 $this->setConteudo($this->Class_loteria->getArrayAtributos());
                 $this->setConteudo($this->ListarTodososJogos());
+                $this->setConteudo($this->Class_loteria->getInformacoesUsuarioPremiado());
+
                 break;
             case "DELETE":
                 // if (!$this->Excluiloteria()) {

@@ -39,6 +39,16 @@ class Class_usuario_jogos
         ];
     }
 
+
+    public function CarregaJogoPremiado($loteria_idloteria)
+    {
+        $where = " WHERE loteria_idloteria = {$loteria_idloteria} and jogo_vencedor = 'S'";
+        if ($this->carregaUsuarioJogos(false, $where)) {
+            return true;
+        }
+        return false;
+    }
+
     // Função para carregar um registro do jogo
     public function carregaUsuarioJogos($idusuario_jogos = false, $extra = false)
     {

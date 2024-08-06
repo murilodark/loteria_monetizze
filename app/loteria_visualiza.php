@@ -97,6 +97,14 @@ if ($idloteria === false) {
                 if (result.success) {
                     const data = result.data[0]; // Acessa o primeiro item do array de dados
                     const dataJogos = result.data[1]; // Jogos do usuario
+                    let inforPremioHTML = '';
+                    if (result.data[2]) {
+                        const dataInfoPremio = result.data[2];
+                         inforPremioHTML = `                   
+    <p><strong>Usuario Vencedor:</strong> ${dataInfoPremio.nome_usuario || 'Não disponível'}</p>
+    <p><strong>Jogo Premiado:</strong> ${dataInfoPremio.dezenas_escolhidas || 'Não disponível'}</p>
+    `;
+                    }
                     //carrega no html do form as informações da loteria 
                     let visualizaLoteriaHTML = `                   
     <p><strong>ID da Loteria:</strong> ${data.idloteria || 'Não disponível'}</p>
@@ -108,7 +116,7 @@ if ($idloteria === false) {
     <p><strong>Sorteado por:</strong> ${data.usuario_sistema_sorteio || 'Não disponível'}</p>
     <p><strong>Dezenas Sorteadas:</strong> ${data.dezenas_sorteadas || 'Não disponível'}</p>
 `;
-
+                    visualizaLoteriaHTML += inforPremioHTML;
                     // Condicional para adicionar o link de Meus Jogos e o botão para Sortea, 
                     //inclui tambem os inputs necessários para postagem do sorteio 
                     if (data.status_loteria == "Andamento") {

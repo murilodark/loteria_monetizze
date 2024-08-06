@@ -51,6 +51,20 @@ class Class_loteria
         ];
     }
 
+    /**
+     * Método responsável por retornar informações do usuario premiado
+     */
+    public function getInformacoesUsuarioPremiado()
+    {
+        $arrayInfo = '';
+        if ($this->getusuario_sistema_sorteio()) {
+            if ($this->Class_usuario_jogos->CarregaJogoPremiado($this->getidloteria())) {
+                $arrayInfo = $this->Class_usuario_jogos->getArrayAtributos();
+            }
+        }
+        return $arrayInfo;
+    }
+
     // Função para carregar um registro da loteria
     public function carregaLoteria($idloteria = false, $extra = false)
     {
