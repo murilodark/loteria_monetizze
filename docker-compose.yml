@@ -34,6 +34,7 @@ services:
       MYSQL_USER: ${DB_USERNAME:-username}
     volumes:
       - ./docker/mysql:/var/lib/mysql
+      - ./docker/dump:/docker-entrypoint-initdb.d      
     ports:
       - "${DB_PORT}:3306"
     networks:
