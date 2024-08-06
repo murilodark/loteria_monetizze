@@ -1,5 +1,6 @@
 /.phpunit.cache
 /docker/mysql/*
+/app/vendor/*
 .env
 .env.backup
 .env.production
@@ -7,3 +8,4 @@
 /.idea
 /.vscode
 /.docker
+
