@@ -1,4 +1,4 @@
-/.phpunit.cache
+/app/.phpunit.cache/*
 /docker/mysql/*
 /app/vendor/*
 # .env
