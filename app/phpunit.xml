@@ -9,9 +9,12 @@
          beStrictAboutCoverageMetadata="true"
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
-         failOnWarning="true">
+         failOnWarning="true"
+         colors="true"
+         stopOnFailure="false">
     <testsuites>
-        <testsuite name="default">
+        <!-- <testsuite name="default"> -->
+        <testsuite name="Application Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
