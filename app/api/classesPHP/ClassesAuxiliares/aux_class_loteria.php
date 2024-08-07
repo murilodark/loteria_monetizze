@@ -230,7 +230,10 @@ class aux_class_loteria extends Class_Valida_Dados
         if (!$arrayJogos) {
             return false;
         }
-        list($jogoPremiados, $arrayDezenasPremiadas) = $this->EfetuaSorteio($arrayJogos);
+        if (!list($jogoPremiados, $arrayDezenasPremiadas) = $this->EfetuaSorteio($arrayJogos)) {
+            $this->setErros('Ocorreu um erro ao efetuar o sorteio, tente novamente.');
+            return false;
+        }
         $stringDezenasSorteadas = implode(',', $arrayDezenasPremiadas);
         $jogopremiado = array_values($jogoPremiados);
         $idjogopremiado = $jogopremiado[0]['idjogo'];
@@ -286,7 +289,7 @@ class aux_class_loteria extends Class_Valida_Dados
      * @param array $arrayJogos - array contendo todos os jogos da loteria
      * @return array - retorna um array contendo o jogo premiados e dezenas sorteadas [$jogoPremiados, $arrayDezenasPremiadas]; 
      */
-    private function EfetuaSorteioOk(array $arrayJogos)
+    private function EfetuaSorteio(array $arrayJogos)
     {
         $dezenas = range(1, 60);
         $arrayDezenasSorteadas = [];
@@ -324,63 +327,17 @@ class aux_class_loteria extends Class_Valida_Dados
             $i++;
         }
         sort($arrayDezenasPremiadas);
+
+        if (count($jogoPremiados) < 1) {
+            $this->setErros('Não foi encontrado jogo premiado. ');
+            return false;
+        }
         //passa o jogos filtrado e as dezenas premiadas para um array de resultado
         $resultado = [$jogoPremiados, $arrayDezenasPremiadas];
-
         return $resultado;
     }
 
 
-    private function EfetuaSorteio(array $arrayJogos)
-{
-    $dezenas = range(1, 60);
-    $arrayDezenasSorteadas = [];
-    $arrayDezenasPremiadas = [];
-    $jogoPremiados = $arrayJogos; // Inicia com todos os jogos
-
-    $i = 1;
-    while ($i < 60 && count($arrayDezenasPremiadas) < 6) {
-        // Embaralha os números do array
-        shuffle($dezenas);
-        // Seleciona uma dezena específica
-        $dezenaSorteada = array_slice($dezenas, 0, 1)[0];
-
-        // Remove a dezena sorteada do array $dezenas
-        $dezenas = array_diff($dezenas, [$dezenaSorteada]);
-
-        // Adiciona a dezena sorteada ao array de dezenas sorteadas
-        if (!in_array($dezenaSorteada, $arrayDezenasSorteadas)) {
-            $arrayDezenasSorteadas[] = $dezenaSorteada;
-        }
-        // Saída de debug
-        // var_dump($dezenaSorteada);
-        // var_dump($arrayDezenasSorteadas);
-
-        // Filtra os jogos que contêm todas as dezenas sorteadas até agora
-        $jogoPremiados = array_filter($arrayJogos, function ($jogo) use ($arrayDezenasSorteadas) {
-            // Verifica se o jogo contém todas as dezenas sorteadas
-            return empty(array_diff($arrayDezenasSorteadas, $jogo['arrayDezenas']));
-        });
-        // Saída de debug
-        // var_dump($jogoPremiados);
-
-        // Verifica se nenhum jogo foi encontrado
-        if (empty($jogoPremiados)) {
-            // Recarrega o array com as dezenas premiadas
-            $arrayDezenasSorteadas = $arrayDezenasPremiadas;
-            sort($dezenas);
-        } else {
-            // Adiciona a dezena sorteada ao array de dezenas premiadas
-            $arrayDezenasPremiadas[] = $dezenaSorteada;
-        }
-        $i++;
-    }
-    sort($arrayDezenasPremiadas);
-    //passa o jogos filtrado e as dezenas premiadas para um array de resultado
-    $resultado = [$jogoPremiados, $arrayDezenasPremiadas];
-
-    return $resultado;
-}
 
 
     /**

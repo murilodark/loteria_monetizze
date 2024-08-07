@@ -32,49 +32,54 @@ class aux_class_loteriaTest extends TestCase
             sort($jogo);
             $stringJogo = implode(',', $jogo);
             if (!in_array($stringJogo, $lista)) {
-                $lista[] = ['arrayDezenas' => $jogo];
+                // $lista[] = ['arrayDezenas' => $jogo];
+                $lista[] =   [
+                    "idjogo" => rand(),
+                    "arrayDezenas" => $jogo
+                ];
             }
         }
         return $lista;
     }
 
-
-
     public function testEfetuaSorteio()
-    {
-        // Simular a variável $_SERVER['REQUEST_METHOD']
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+{
+    // Simular a variável $_SERVER['REQUEST_METHOD']
+    $_SERVER['REQUEST_METHOD'] = 'GET';
 
-        // Usando Reflection para acessar o método privado
-        $reflection = new ReflectionClass($this->auxClassLoteria);
-        $method = $reflection->getMethod('EfetuaSorteio');
-        $method->setAccessible(true);
+    // Usando Reflection para acessar o método privado
+    $reflection = new ReflectionClass($this->auxClassLoteria);
+    $method = $reflection->getMethod('EfetuaSorteio');
+    $method->setAccessible(true);
 
-        // Criar jogos simulados para testar
-        $arrayJogos = $this->gerarListaDeJogos(10, 6);
+    // Criar jogos simulados para testar
+    $arrayJogos = $this->gerarListaDeJogos(10, 7); // Ajuste o número de dezenas conforme necessário
 
-        // Executar o método
-        list($jogoPremiado, $dezenasPremiadas) = $method->invoke($this->auxClassLoteria, $arrayJogos);
+    // Executar o método
+    list($jogoPremiado, $dezenasPremiadas) = $method->invoke($this->auxClassLoteria, $arrayJogos);
 
-        // Verificação do jogo premiado
-        $this->assertNotEmpty($jogoPremiado, 'Não foi encontrado um jogo premiado.');
-        $this->assertCount(1, $jogoPremiado, 'Deve haver exatamente um jogo premiado.');
+    // Debug info
+    // echo "Jogo Premiado: \n";
+    // var_dump($jogoPremiado);
+    // echo "Dezenas Premiadas: " . implode(',', $dezenasPremiadas) . "\n";
 
-        // Verifica se o jogo premiado contém todas as 6 dezenas sorteadas
-        $jogoPremiadoDezenas = $jogoPremiado[0]['arrayDezenas'] ?? [];
+    // Verificação do jogo premiado
+    $this->assertNotEmpty($jogoPremiado, 'Não foi encontrado um jogo premiado.');
+    $this->assertCount(1, $jogoPremiado, 'Deve haver exatamente um jogo premiado.');
 
-        echo "Jogo premiado.\n";
-        echo implode(',', $jogoPremiadoDezenas) . "\n";
+    // O primeiro elemento do array de jogos premiados pode ter uma chave específica
+    $jogoPremiadoDezenas = reset($jogoPremiado)['arrayDezenas'] ?? [];
 
-        foreach ($dezenasPremiadas as $dezena) {
-            if (!in_array($dezena, $jogoPremiadoDezenas)) {
-                $this->fail("Erro: A dezena sorteada {$dezena} não está presente no jogo premiado.");
-            }
+    // Verifica se o jogo premiado contém todas as 6 dezenas sorteadas
+    foreach ($dezenasPremiadas as $dezena) {
+        if (!in_array($dezena, $jogoPremiadoDezenas)) {
+            $this->fail("Erro: A dezena sorteada {$dezena} não está presente no jogo premiado. -> Jogo premiado: " . implode(',', $jogoPremiadoDezenas));
         }
-
-        // Verifica se as dezenas premiadas são únicas
-        $this->assertCount(count(array_unique($dezenasPremiadas)), $dezenasPremiadas, 'As dezenas premiadas não devem se repetir.');
     }
+
+    // Verifica se as dezenas premiadas são únicas
+    $this->assertCount(count(array_unique($dezenasPremiadas)), $dezenasPremiadas, 'As dezenas premiadas não devem se repetir.');
+}
 
 
     // Método auxiliar para chamar métodos privados
