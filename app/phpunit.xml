@@ -13,17 +13,10 @@
          colors="true"
          stopOnFailure="false">
     <testsuites>
-        <!-- <testsuite name="default"> -->
         <testsuite name="Application Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-
-    <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
-        <include>
-            <directory>api</directory>
-        </include>
-    </source>
 
     <coverage>
         <include>

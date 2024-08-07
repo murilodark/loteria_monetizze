@@ -51,8 +51,10 @@ composer --version
 composer require --dev phpunit/phpunit
 
 #agora que foi instalado, utilize o comando
-vendor/bin/phpunit --colors=always
+vendor/bin/phpunit --colors=always tests/aux_class_loteriaTest.php
+vendor/bin/phpunit --colors=always tests/aux_class_usuario_jogosTest.php
 para rodar os testes que estão localizados no diretório app/tests
+
 
 
 

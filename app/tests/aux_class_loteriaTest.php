@@ -38,6 +38,8 @@ class aux_class_loteriaTest extends TestCase
         return $lista;
     }
 
+
+
     public function testEfetuaSorteio()
     {
         // Simular a variável $_SERVER['REQUEST_METHOD']
@@ -60,16 +62,20 @@ class aux_class_loteriaTest extends TestCase
 
         // Verifica se o jogo premiado contém todas as 6 dezenas sorteadas
         $jogoPremiadoDezenas = $jogoPremiado[0]['arrayDezenas'] ?? [];
-        foreach ($dezenasPremiadas as $dezena) {
-            $this->assertContains($dezena, $jogoPremiadoDezenas, 'O jogo premiado deve conter a dezena sorteada: ' . $dezena);
-        }
 
-        // Verifica se o jogo premiado pode conter mais do que 6 dezenas, se for o caso
-        $this->assertGreaterThanOrEqual(6, count($jogoPremiadoDezenas), 'O jogo premiado deve ter pelo menos 6 dezenas.');
+        echo "Jogo premiado.\n";
+        echo implode(',', $jogoPremiadoDezenas) . "\n";
+
+        foreach ($dezenasPremiadas as $dezena) {
+            if (!in_array($dezena, $jogoPremiadoDezenas)) {
+                $this->fail("Erro: A dezena sorteada {$dezena} não está presente no jogo premiado.");
+            }
+        }
 
         // Verifica se as dezenas premiadas são únicas
         $this->assertCount(count(array_unique($dezenasPremiadas)), $dezenasPremiadas, 'As dezenas premiadas não devem se repetir.');
     }
+
 
     // Método auxiliar para chamar métodos privados
     private function callMethod($object, $methodName, array $parameters = [])
